@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using HotChocolate;
+using HotChocolate.Types;
+using HotChocolate.Types.Relay;
+using StarWars.Types;
 
 namespace StarWars.Models
 {
@@ -10,6 +14,7 @@ namespace StarWars.Models
         /// <summary>
         /// The unique identifier for the character.
         /// </summary>
+        [GraphQLType(typeof(NonNullType<IdType>))]
         string Id { get; }
 
         /// <summary>
@@ -20,6 +25,7 @@ namespace StarWars.Models
         /// <summary>
         /// The names of the character's friends.
         /// </summary>
+        [UsePaging(typeof(ICharacter))]
         IReadOnlyList<string> Friends { get; }
 
         /// <summary>
@@ -30,6 +36,7 @@ namespace StarWars.Models
         /// <summary>
         /// The height of the character.
         /// </summary>
+        [UseCalculateUnit]
         double Height { get; }
     }
 }

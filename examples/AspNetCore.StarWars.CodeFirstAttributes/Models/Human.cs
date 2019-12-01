@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using HotChocolate;
+using HotChocolate.Types;
+using HotChocolate.Types.Relay;
+using StarWars.Types;
 
 namespace StarWars.Models
 {
@@ -9,12 +13,14 @@ namespace StarWars.Models
         : ICharacter
     {
         /// <inheritdoc />
+        [GraphQLType(typeof(NonNullType<IdType>))]
         public string Id { get; set; }
 
         /// <inheritdoc />
         public string Name { get; set; }
 
         /// <inheritdoc />
+        [UsePaging(typeof(ICharacter))]
         public IReadOnlyList<string> Friends { get; set; }
 
         /// <inheritdoc />
