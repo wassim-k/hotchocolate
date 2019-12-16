@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using HotChocolate.Language;
 using HotChocolate.Types.Descriptors;
@@ -485,6 +486,18 @@ namespace HotChocolate.Types
             schema.ToString().MatchSnapshot();
         }
 
+        [Fact]
+        public void Create_Schema_With_Interfaces_That_ReUses_Class_Model()
+        {
+            ISchema schema = SchemaBuilder.New()
+                .AddQueryType<BarQuery>()
+                .AddType<BarType>()
+                .AddType<BarImplType>()
+                .Create();
+
+            schema.ToString().MatchSnapshot();
+        }
+
         public interface IFoo
         {
             bool Bar { get; }
@@ -534,6 +547,51 @@ namespace HotChocolate.Types
             public string Bar() => "foo";
 
             public string Bar2() => "Foo 2: Electric foo-galoo";
+        }
+
+        public class BarQuery : ObjectType
+        {
+            protected override void Configure(IObjectTypeDescriptor descriptor)
+            {
+                descriptor.Field("bars")
+                    .Type<ListType<BarBaseType>>()
+                    .Resolver(ctx =>
+                    {
+                        return new List<BarBase>
+                        {
+                            new BarBase(),
+                            new BarImpl()
+                        };
+                    });
+            }
+        }
+
+        public class BarBaseType : InterfaceType<BarBase> { }
+
+        public class BarType : ObjectType<BarBase>
+        {
+            protected override void Configure(IObjectTypeDescriptor<BarBase> descriptor)
+            {
+                descriptor.Name("Bar").Implements<BarBaseType>();
+            }
+        }
+
+        public class BarImplType : ObjectType<BarImpl>
+        {
+            protected override void Configure(IObjectTypeDescriptor<BarImpl> descriptor)
+            {
+                descriptor.Implements<BarBaseType>();
+            }
+        }
+
+        public class BarBase
+        {
+            public string Foo { get; set; } = "123";
+        }
+
+        public class BarImpl : BarBase
+        {
+            public string Baz { get; set; } = "456";
         }
     }
 }
