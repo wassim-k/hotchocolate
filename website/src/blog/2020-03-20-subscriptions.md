@@ -9,7 +9,7 @@ authorImageURL: https://avatars1.githubusercontent.com/u/9714350?s=100&v=4
 
 ![Hot Chocolate](../images/blog/hotchocolate-banner.png)
 
-In this post we will take a look at what subscriptions are and how we can use them with _Hot Chocolate_.
+In this post we will take a look at what subscriptions are and learn how we can use them with _Hot Chocolate_ to provide data in real-time.
 
 GraphQL has three kinds of root types. _Query_, _Mutation_ and _Subscription_. Each of these root types represents a way to interact with data and brings with it different execution algorithms for the execution engine.
 
@@ -27,7 +27,7 @@ What we are looking more closely at in this post is the _Subscription_ root type
 
 The _Subscription_ type is like _Query_ and _Mutation_ and object type. But instead of having to send in a request to the server and getting a immediate response we rather get an response every time something happens on our sever.
 
-Each field of our _Subscription_ type actually represents one event to which we can register. Like with regular queries we can define what data we want whenever the event occurs.
+Each field of our _Subscription_ type actually represents one event to which we can subscribe. Like with regular queries we can define what data we want whenever the event occurs.
 
 ```graphql
 subscription onMessageReceived {
