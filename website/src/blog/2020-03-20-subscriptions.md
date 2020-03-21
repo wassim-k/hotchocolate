@@ -15,19 +15,19 @@ GraphQL has three kinds of root types. _Query_, _Mutation_ and _Subscription_. E
 
 The most prominent root type is _Query_ which allows us to read data from our system. _Query_ is expected to be side-effect free and the execution engine is free to parallelize resolvers when processing a query operation.
 
-The _Mutation_ root type allows us the change data in our system. This means that mutation operations are expected to have side-effects on our system. This is why the resolvers of mutations are executed serially.
+The _Mutation_ root type allows us the change data in our system. This means that mutation operations are expected to have side-effects on the system. This is why the resolvers of mutations are executed serially.
 
 The _Query_ and the _Mutation_ type have in common that the consumer initiated any interaction with them by sending in a GraphQL request.
 
-What we are looking more closely at in this post is the _Subscription_ root type.
+What we are looking more closely at in this blog post is the _Subscription_ root type.
 
 <!--truncate-->
 
 ## Introduction
 
-The _Subscription_ type is like _Query_ and _Mutation_ and object type. But instead of having to send in a request to the server and getting a immediate response we rather get an response every time something happens on our sever.
+The _Subscription_ root type is like _Query_ and _Mutation_ an object type. But instead of having to send in a request to the server and getting a immediate response we rather get an response every time something happens on our sever.
 
-Each field of our _Subscription_ type actually represents one event to which we can subscribe. Like with regular queries we can define what data we want whenever the event occurs.
+Each field of our _Subscription_ type actually represents one event to which we can subscribe. Like with regular queries we can define what data we want but instead of getting an immediate response the server will send us a response whenever the event occurs.
 
 ```graphql
 subscription onMessageReceived {
@@ -40,6 +40,145 @@ subscription onMessageReceived {
   }
 }
 ```
+
+In most cases subscriptions are triggered by mutations since this is where the server state changes.
+
+**DIAGRAMM**
+
+But subscriptions could also be triggered by external events that directly write into the pub-/sub-system that is used to handle the event messaging.
+
+## Putting it to use
+
+Let us put subscriptions to use in order to see how it actually works. Let us say we have a simple messaging application with the following GraphQL schema.
+
+```graphql
+type Query {
+  messages: [Message!]!
+}
+
+type Mutation {
+  sendMessage(input: SendMessageInput) : SendMessagePayload
+}
+
+type Subscription {
+  onMessageReceived : Message
+}
+
+type Message {
+  text: String!
+}
+```
+
+The schema is a very simplified message app without any user. Anybody can subscribe for messages and anybody would receive the same. But let us get started with this simplified version and then advance it wile we are getting deeper into the API.
+
+Our schema has all three root types. With the current GraphQL spec we always need a `Query` type. While we do not actually need this type for our example we still want to be compliant. The `Query` type in our case has one field that give us access to all past send messages.
+
+Next, we have a `Mutation` type which can be used to send in one message. Whenever we send a message through our mutation we will trigger a subscription.
+
+Lastly, we have our `Subscription` type which has one event called `onMessageReceived`. The event will be triggered every time a message is sent and it returns the message.
+
+OK, let us first create our `Mutation` type.
+
+```csharp
+public class Mutation
+{
+    public Task<SendMessagePayload> SendMessage(
+        SendMessageInput input,
+        [Service]IMessage repository,
+        [Service]ITopicEventSender eventSender,
+        CancellationToken cancellationToken)
+    {
+        var message = new Message(input.Text);
+        await repository.AddMessageAsync(message, cancellationToken);
+        await eventSender.SendAsync("AllMessages", message, cancellationToken);
+        return new SendMessageInput(message);
+    }
+}
+```
+
+## Ddd
+
+_Hot Chocolate_ does a good job of abstracting the complexity of subscriptions away while you still are able to handle everything on your own.
+
+The _Hot Chocolate_ subscription abstractions is represented by a topic. Multiple users / threads can send messages to a topic. Also multiple subscriptions can subscribe to a topic.
+
+A Pub-/Sub-System is represented by two basic interfaces, the `ITopicEventSender` and the `ITopicEventReceiver`.
+
+```csharp
+/// <summary>
+/// The topic event sender sends event messages to the pub/sub-system.
+/// Typically a mutation would use the event dispatcher to raise events
+/// after some changes were committed to the backend system.
+/// </summary>
+public interface ITopicEventSender
+{
+    /// <summary>
+    /// Sends an event message to the pub/sub-system.
+    /// </summary>
+    /// <param name="topic">
+    /// The topic to which the event message belongs to.
+    /// </param>
+    /// <param name="message">
+    /// The event message.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    ValueTask SendAsync<TTopic, TMessage>(
+        TTopic topic,
+        TMessage message,
+        CancellationToken cancellationToken = default)
+        where TTopic : notnull;
+
+    /// <summary>
+    /// Completes a event topic which causes the
+    /// <see cref="IEventStream{TMessage}" /> to complete.
+    /// </summary>
+    /// <param name="topic">
+    /// The topic to which the event message belongs to.
+    /// </param>
+    /// <param name="message">
+    /// The event message.
+    /// </param>
+    ValueTask CompleteAsync<TTopic>(TTopic topic)
+        where TTopic : notnull;
+}
+```
+
+The `ITopicEventSender` is used in a mutation to push messages to a topic. If nobody is subscribed to that topic the pub-/sub-system may just drop the messages.
+
+```csharp
+/// <summary>
+/// The <see cref="ITopicEventReceiver" /> creates subscriptions to
+/// specific event topics and returns an <see cref="IEventStream{TMessage}" />
+/// which represents a stream of event message for the specified topic.
+/// </summary>
+public interface ITopicEventReceiver
+{
+    /// <summary>
+    /// Subscribes to the specified event <paramref name="topic" />.
+    /// </summary>
+    /// <param name="topic">
+    /// The topic to which the event message belongs to.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// Returns a <see cref="IEventStream{TMessage}" />
+    /// for the given event <paramref name="topic" />.
+    /// </returns>
+    ValueTask<IEventStream<TMessage>> SubscribeAsync<TTopic, TMessage>(
+        TTopic topic,
+        CancellationToken cancellationToken = default)
+        where TTopic : notnull;
+}
+```
+
+`ITopicEventReceiver` is used on the subscription type itself to subscribe to a topic.
+
+_Hot Chocolate_ provides two pub-/sub-system implementations out of the box. Firstly we can use an in-memory implementation which is great when we just have one server or during development time. Secondly, _Hot Chocolate_ provides an implementation that uses _Redis_ as a pub-/sub-system. But it is very simple to just implement these two interfaces for other pub-/sub-systems like _Azure ServiceBus_ or others.
+
 
 
 
