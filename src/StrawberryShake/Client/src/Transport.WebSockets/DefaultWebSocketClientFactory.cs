@@ -1,7 +1,11 @@
 using System;
 using Microsoft.Extensions.Options;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport
+#endif
 {
     public class DefaultWebSocketClientFactory
         : IWebSocketClientFactory

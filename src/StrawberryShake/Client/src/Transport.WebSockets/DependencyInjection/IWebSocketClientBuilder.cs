@@ -1,6 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport
+#endif
 {
     /// <summary>
     /// A builder for configuring named <see cref="IWebSocketClient"/>

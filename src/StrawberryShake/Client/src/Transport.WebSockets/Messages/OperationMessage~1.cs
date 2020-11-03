@@ -1,4 +1,4 @@
-namespace StrawberryShake.Transport.WebSockets.Messages
+namespace StrawberryShake.Transport.Messages
 {
     public class OperationMessage<T>
         : OperationMessage

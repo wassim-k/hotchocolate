@@ -2,7 +2,11 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport.DependencyInjection
+#endif
 {
     public static class WebSocketConnectionPoolServiceCollectionExtensions
     {

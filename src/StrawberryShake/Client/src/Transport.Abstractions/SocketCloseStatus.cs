@@ -1,4 +1,8 @@
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
 namespace StrawberryShake.Transport
+#endif
 {
     public enum SocketCloseStatus
     {

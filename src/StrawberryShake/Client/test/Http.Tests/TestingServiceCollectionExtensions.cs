@@ -15,7 +15,7 @@ namespace StrawberryShake.Http
             services.AddStarWarsRepositories();
 
             // Add in-memory event provider
-            services.AddInMemorySubscriptionProvider();
+            services.AddInMemorySubscriptions();
 
             // Add GraphQL Services
             services.AddGraphQL(sp => SchemaBuilder.New()

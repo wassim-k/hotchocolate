@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageId>StrawberryShake.Transport.WebSockets</PackageId>
     <AssemblyName>StrawberryShake.Transport.WebSockets</AssemblyName>
-    <RootNamespace>StrawberryShake.Transport.WebSockets</RootNamespace>
+    <RootNamespace>StrawberryShake.Transport</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

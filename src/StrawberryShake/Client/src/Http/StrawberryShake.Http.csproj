@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\HotChocolate\Language\src\Language.Utf8\HotChocolate.Language.Utf8.csproj" />
     <ProjectReference Include="..\Abstractions\StrawberryShake.Abstractions.csproj" />
     <ProjectReference Include="..\Configuration\StrawberryShake.Configuration.csproj" />
     <ProjectReference Include="..\Transport.Abstractions\StrawberryShake.Transport.Abstractions.csproj" />

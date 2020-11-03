@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using StrawberryShake.Transport;
-using StrawberryShake.Transport.WebSockets;
+using StrawberryShake.Transport.DependencyInjection;
 using Xunit;
 
 namespace StrawberryShake.Http
@@ -13,7 +13,7 @@ namespace StrawberryShake.Http
         [Fact(Skip = "Fix this test")]
         public async Task Rent_Single_Connection()
         {
-            using (IWebHost host = TestServerHelper.CreateServer(out int port))
+            using (IWebHost host = TestServerHelper.CreateServer(out var port))
             {
                 // arrange
                 var serviceCollection = new ServiceCollection();

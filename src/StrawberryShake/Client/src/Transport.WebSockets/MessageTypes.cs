@@ -1,4 +1,8 @@
-﻿namespace StrawberryShake.Transport.WebSockets
+﻿#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport
+#endif
 {
     internal static class MessageTypes
     {

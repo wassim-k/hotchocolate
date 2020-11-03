@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using HotChocolate.Language;
 using StrawberryShake.Http.Subscriptions.Messages;
-using StrawberryShake.Transport.WebSockets.Messages;
+using StrawberryShake.Transport.Messages;
 using static HotChocolate.Language.Utf8GraphQLRequestParser;
 
 namespace StrawberryShake.Http.Subscriptions
@@ -121,7 +121,7 @@ namespace StrawberryShake.Http.Subscriptions
         private OperationMessage DeserializeSubscriptionResultMessage(
             GraphQLSocketMessage parsedMessage)
         {
-            if (parsedMessage.Id is null || !parsedMessage.HasPayload)
+            if (parsedMessage.Id is null || parsedMessage.Payload.Length == 0)
             {
                 // TODO : resources
                 throw new InvalidOperationException("Invalid message structure.");

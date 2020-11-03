@@ -1,7 +1,11 @@
 using System;
 using System.Buffers;
 
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
 namespace StrawberryShake.Transport
+#endif
 {
     public interface IRequestWriter
         : IBufferWriter<byte>

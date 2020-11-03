@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport
+#endif
 {
     public class WebSocketClientFactoryOptions
     {

@@ -1,6 +1,10 @@
 using System.Text.Json;
 
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
 namespace StrawberryShake.Transport
+#endif
 {
     public sealed class SocketMessageWriter
         : MessageWriter

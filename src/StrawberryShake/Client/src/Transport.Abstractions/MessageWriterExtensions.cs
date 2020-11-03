@@ -1,6 +1,10 @@
 using System.Net.Http;
 
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
 namespace StrawberryShake.Transport
+#endif
 {
     public static class MessageWriterExtensions
     {

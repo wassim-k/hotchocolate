@@ -2,7 +2,11 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport.DependencyInjection
+#endif
 {
     /// <summary>
     /// Extension methods for configuring an <see cref="IWebSocketClientBuilder"/>

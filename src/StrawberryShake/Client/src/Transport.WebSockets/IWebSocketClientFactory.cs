@@ -1,7 +1,10 @@
 using System.Net.WebSockets;
-using StrawberryShake.Transport.WebSockets;
 
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
 namespace StrawberryShake.Transport
+#endif
 {
     /// <summary>
     /// A factory abstraction for a component that can create <see cref="ClientWebSocket"/>

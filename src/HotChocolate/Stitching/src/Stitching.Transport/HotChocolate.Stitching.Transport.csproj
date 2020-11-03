@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>HotChocolate.Stitching.Transport</PackageId>
+    <RootNamespace>HotChocolate.Stitching.Transport</RootNamespace>
+    <Description>Contains the Hot Chocolate GraphQL schema stitching layer.</Description>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants); STITCHING</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Core\src\Core\HotChocolate.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Pipelines" Version="$(SystemIOPipelines)" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\StrawberryShake\Client\src\Transport.Abstractions\**\*.cs" Exclude="..\..\..\..\StrawberryShake\Client\src\Transport.Abstractions\obj\**;..\..\..\..\StrawberryShake\Client\src\Transport.Abstractions\bin\**;" />
+    <Compile Include="..\..\..\..\StrawberryShake\Client\src\Transport.WebSockets\**\*.cs" Exclude="..\..\..\..\StrawberryShake\Client\src\Transport.WebSockets\obj\**;..\..\..\..\StrawberryShake\Client\src\Transport.WebSockets\bin\**;" />
+  </ItemGroup>
+
+</Project>

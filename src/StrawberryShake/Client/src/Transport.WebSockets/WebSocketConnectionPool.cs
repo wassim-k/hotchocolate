@@ -1,10 +1,14 @@
-using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport
+#endif
 {
     internal sealed class WebSocketConnectionPool
         : ISocketConnectionPool
@@ -51,7 +55,7 @@ namespace StrawberryShake.Transport.WebSockets
                     await InitializeConnectionAsync(connectionInfo.Connection, cancellationToken)
                         .ConfigureAwait(false);
 
-                    for (int i = 0; i < _connectionInterceptors.Length; i++)
+                    for (var i = 0; i < _connectionInterceptors.Length; i++)
                     {
                         await _connectionInterceptors[i].OnConnectAsync(
                             connectionInfo.Connection)

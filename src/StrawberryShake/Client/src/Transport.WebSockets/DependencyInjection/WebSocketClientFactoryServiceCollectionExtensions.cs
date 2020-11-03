@@ -3,7 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace StrawberryShake.Transport.WebSockets
+#if STITCHING
+namespace HotChocolate.Stitching.Transport
+#else
+namespace StrawberryShake.Transport.DependencyInjection
+#endif
 {
     /// <summary>
     /// Extensions methods to configure an <see cref="IServiceCollection"/> for <see cref="IWebSocketClientFactory"/>.
