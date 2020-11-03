@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
-    public class SubscriptionManager : ISubscriptionManager
+    public sealed class SubscriptionManager : ISubscriptionManager
     {
         private readonly ConcurrentDictionary<string, ISubscription> _subs =
             new ConcurrentDictionary<string, ISubscription>();
@@ -32,49 +33,42 @@ namespace HotChocolate.AspNetCore.Subscriptions
 
             if (_subs.TryAdd(subscription.Id, subscription))
             {
+                subscription.Start();
                 subscription.Completed += (sender, eventArgs) =>
-                {
-                    Unregister(subscription.Id);
-                };
+                    _subs.TryRemove(subscription.Id, out _);
             }
         }
 
-        public void Unregister(string subscriptionId)
+        public async Task StopSubscriptionAsync(string subscriptionId)
         {
-            if (subscriptionId == null)
+            if (string.IsNullOrEmpty(subscriptionId))
             {
-                throw new ArgumentNullException(nameof(subscriptionId));
-            }
-
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(SubscriptionManager));
+                throw new ArgumentException(
+                    $"'{nameof(subscriptionId)}' cannot be null or empty.",
+                    nameof(subscriptionId));
             }
 
             if (_subs.TryRemove(subscriptionId, out ISubscription? subscription))
             {
-                subscription.Dispose();
+                await subscription.StopAsync();
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
-                if (disposing && _subs.Count > 0)
+                if (_subs.Count > 0)
                 {
                     ISubscription?[] subs = _subs.Values.ToArray();
                     _subs.Clear();
 
                     for (int i = 0; i < subs.Length; i++)
                     {
-                        subs[i]?.Dispose();
+                        if (subs[i] is { } s)
+                        {
+                            await s.StopAsync();
+                        }
                         subs[i] = null;
                     }
                 }

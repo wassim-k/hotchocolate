@@ -1,6 +1,5 @@
 using System;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
@@ -12,14 +11,21 @@ namespace HotChocolate.AspNetCore.Subscriptions
 
         public event EventHandler Completed;
 
+        public void Start()
+        {
+        }
+
         public void Complete()
         {
             Completed?.Invoke(this, EventArgs.Empty);
         }
 
-        public void Dispose()
+        public async Task StopAsync() => await DisposeAsync();
+
+        public ValueTask DisposeAsync()
         {
             IsDisposed = true;
+            return default;
         }
     }
 }

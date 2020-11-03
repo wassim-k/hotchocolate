@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
-    public class WebSocketSession : ISocketSession
+    public sealed class WebSocketSession : ISocketSession
     {
         private readonly Pipe _pipe = new Pipe();
         private readonly ISocketConnection _connection;
@@ -54,19 +54,13 @@ namespace HotChocolate.AspNetCore.Subscriptions
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
-                if (disposing && _disposeConnection)
+                if (_disposeConnection)
                 {
-                    _connection.Dispose();
+                    await _connection.DisposeAsync();
                 }
                 _disposed = true;
             }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
-    public interface ISocketConnection : IDisposable
+    public interface ISocketConnection : IAsyncDisposable
     {
         HttpContext HttpContext { get; }
 

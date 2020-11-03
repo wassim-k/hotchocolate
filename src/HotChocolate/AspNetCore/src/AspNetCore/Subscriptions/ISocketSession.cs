@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
-    public interface ISocketSession : IDisposable
+    public interface ISocketSession : IAsyncDisposable
     {
         Task HandleAsync(CancellationToken cancellationToken);
     }

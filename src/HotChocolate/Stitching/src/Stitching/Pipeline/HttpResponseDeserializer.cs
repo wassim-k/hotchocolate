@@ -104,7 +104,7 @@ namespace HotChocolate.Stitching.Pipeline
         {
             var deserialized = new Dictionary<string, object?>();
 
-            foreach (var item in obj)
+            foreach (KeyValuePair<string, object?> item in obj)
             {
                 deserialized.Add(item.Key, DeserializeErrorValue(item.Value));
             }
@@ -117,7 +117,7 @@ namespace HotChocolate.Stitching.Pipeline
         {
             var deserialized = new List<object?>();
 
-            foreach (var item in list)
+            foreach (object? item in list)
             {
                 deserialized.Add(DeserializeErrorValue(item));
             }

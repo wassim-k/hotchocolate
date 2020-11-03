@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HotChocolate.AspNetCore.Subscriptions
@@ -48,7 +49,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
         }
 
         [Fact]
-        public void Register_Subscription_ManagerAlreadyDisposed()
+        public async Task Register_Subscription_ManagerAlreadyDisposed()
         {
             // arrange
             var connection = new SocketConnectionMock();
@@ -56,7 +57,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
             var subscription = new SubscriptionMock { Id = "abc" };
 
             subscriptions.Register(subscription);
-            subscriptions.Dispose();
+            await subscriptions.DisposeAsync();
 
             // act
             Action action = () =>
@@ -67,7 +68,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
         }
 
         [Fact]
-        public void Unregister_Subscription()
+        public async Task Unregister_Subscription()
         {
             // arrange
             var connection = new SocketConnectionMock();
@@ -78,14 +79,14 @@ namespace HotChocolate.AspNetCore.Subscriptions
                 t => Assert.Equal(subscription, t));
 
             // act
-            subscriptions.Unregister(subscription.Id);
+            await subscriptions.StopSubscriptionAsync(subscription.Id);
 
             // assert
             Assert.Empty(subscriptions);
         }
 
         [Fact]
-        public void Unregister_Subscription_SubscriptionIdIsNull()
+        public async Task Unregister_Subscription_SubscriptionIdIsNull()
         {
             // arrange
             var connection = new SocketConnectionMock();
@@ -96,14 +97,14 @@ namespace HotChocolate.AspNetCore.Subscriptions
                 t => Assert.Equal(subscription, t));
 
             // act
-            Action action = () => subscriptions.Unregister(null);
+            Func<Task> action = () => subscriptions.StopSubscriptionAsync(null);
 
             // assert
-            Assert.Throws<ArgumentNullException>(action);
+            await Assert.ThrowsAsync<ArgumentException>(action);
         }
 
         [Fact]
-        public void Unregister_Subscription_ManagerAlreadyDisposed()
+        public async Task Unregister_Subscription_ManagerAlreadyDisposed()
         {
             // arrange
             var connection = new SocketConnectionMock();
@@ -111,17 +112,17 @@ namespace HotChocolate.AspNetCore.Subscriptions
             var subscription = new SubscriptionMock { Id = "abc" };
 
             subscriptions.Register(subscription);
-            subscriptions.Dispose();
+            await subscriptions.DisposeAsync();
 
             // act
-            Action action = () => subscriptions.Unregister("abc");
+            Func<Task> action = () => subscriptions.StopSubscriptionAsync("abc");
 
             // assert
-            Assert.Throws<ObjectDisposedException>(action);
+            await Assert.ThrowsAsync<ObjectDisposedException>(action);
         }
 
         [Fact]
-        public void Dispose_Subscriptions()
+        public async Task Dispose_Subscriptions()
         {
             // arrange
             var connection = new SocketConnectionMock();
@@ -133,7 +134,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
             subscriptions.Register(subscription_b);
 
             // act
-            subscriptions.Dispose();
+            await subscriptions.DisposeAsync();
 
             // assert
             Assert.Empty(subscriptions);

@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
-    public class WebSocketConnection
-        : ISocketConnection
+    public sealed class WebSocketConnection : ISocketConnection
     {
         private const string _protocol = "graphql-ws";
         private const int _maxMessageSize = 1024 * 4;
@@ -144,7 +143,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
                     message,
                     cancellationToken);
 
-                Dispose();
+                await DisposeAsync();
             }
             catch
             {
@@ -180,22 +179,13 @@ namespace HotChocolate.AspNetCore.Subscriptions
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
-                if (disposing)
-                {
-                    Subscriptions.Dispose();
-                    _webSocket?.Dispose();
-                    _webSocket = null;
-                }
+                await Subscriptions.DisposeAsync();
+                _webSocket?.Dispose();
+                _webSocket = null;
                 _disposed = true;
             }
         }

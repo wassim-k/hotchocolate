@@ -54,10 +54,6 @@ namespace HotChocolate.AspNetCore.Subscriptions
         {
             throw new NotImplementedException();
         }
-
-        public void Dispose()
-        {
-
-        }
+        public ValueTask DisposeAsync() => default;
     }
 }

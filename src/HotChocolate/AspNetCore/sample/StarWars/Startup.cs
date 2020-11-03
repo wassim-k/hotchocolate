@@ -19,6 +19,7 @@ namespace StarWars
                     .AddStarWarsTypes()
                     .AddStarWarsRepositories()
                     .AddTypeExtension<SlowTypeExtension>()
+                    .AddInMemorySubscriptions()
                 .AddGraphQLServer("hello_world")
                     .AddQueryType(d => d
                         .Name("Query")
@@ -39,6 +40,7 @@ namespace StarWars
             }
 
             app
+                .UseWebSockets()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 {

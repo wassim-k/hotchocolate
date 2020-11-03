@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HotChocolate.AspNetCore.Subscriptions
 {
     public interface ISubscriptionManager
         : IEnumerable<ISubscription>
-        , IDisposable
+        , IAsyncDisposable
     {
         void Register(ISubscription subscription);
 
-        void Unregister(string subscriptionId);
+        Task StopSubscriptionAsync(string subscriptionId);
     }
 }

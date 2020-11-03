@@ -12,6 +12,7 @@ namespace HotChocolate.AspNetCore.Subscriptions
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly ISocketConnection _connection;
         private readonly IResponseStream _responseStream;
+        private Task? _task;
         private bool _disposed;
 
         public event EventHandler? Completed;
@@ -27,15 +28,22 @@ namespace HotChocolate.AspNetCore.Subscriptions
                 throw new ArgumentNullException(nameof(responseStream));
             Id = id ??
                 throw new ArgumentNullException(nameof(id));
-
-            Task.Factory.StartNew(
-                SendResultsAsync,
-                CancellationToken.None,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
         }
 
         public string Id { get; }
+
+        public void Start()
+        {
+            if (!_disposed && _task is null)
+            {
+                _task = SendResultsAsync();
+            }
+        }
+
+        public async Task StopAsync()
+        {
+            await DisposeAsync();
+        }
 
         private async Task SendResultsAsync()
         {
@@ -56,26 +64,34 @@ namespace HotChocolate.AspNetCore.Subscriptions
                     Completed?.Invoke(this, EventArgs.Empty);
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 // the subscription was canceled.
             }
             finally
             {
-                Dispose();
+                _task = null;
+                await StopAsync();
             }
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
+                _disposed = true;
+                
                 if (!_cts.IsCancellationRequested)
                 {
                     _cts.Cancel();
                 }
+
+                if (_task is not null)
+                {
+                    await _task;
+                }
+
                 _cts.Dispose();
-                _disposed = true;
             }
         }
     }
